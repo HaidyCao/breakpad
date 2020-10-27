@@ -88,7 +88,11 @@ bool MemoryMappedFile::Map(const char* path, size_t offset) {
   }
 
   size_t content_len = file_len - offset;
-  void* data = sys_mmap(NULL, content_len, PROT_READ, MAP_PRIVATE, fd, offset);
+#if defined(__ARM_EABI__) || defined(__i386__)
+  void* data = sys_mmap2(NULL, content_len, PROT_READ, MAP_PRIVATE, fd, offset);
+#else
+    void* data = sys_mmap(NULL, content_len, PROT_READ, MAP_PRIVATE, fd, offset);
+#endif
   sys_close(fd);
   if (data == MAP_FAILED) {
     return false;
